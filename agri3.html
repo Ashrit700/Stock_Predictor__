@@ -1,0 +1,272 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kishan HAL – Smart Farming Suite</title>
+
+  <!-- Your CSS -->
+  <link rel="stylesheet" href="agri3.css" />
+
+  <!-- Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.18.0/dist/tf.min.js"></script>
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="logo">🌾 <span>Kishan HAL</span></div>
+    <nav>
+      <button class="nav-item active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="nav-item" data-tab="soil">🌾 Soil Test</button>
+      <button class="nav-item" data-tab="irrigation">💧 Irrigation</button>
+      <button class="nav-item" data-tab="disease">🦠 Disease Check</button>
+      <button class="nav-item" data-tab="mandi">💹 Mandi Prices</button>
+      <button class="nav-item" data-tab="weather">🌤 Weather</button>
+      <button class="nav-item" data-tab="ai">🧠 AI Reco</button>
+      <button class="nav-item" data-tab="compare">🌿 Compare</button>
+      <button class="nav-item" data-tab="smart">🤖 Smart Selector</button>
+      <button class="nav-item" data-tab="fertcalc">🧮 Fertilizer Calc</button>
+      <button class="nav-item" data-tab="pestinfo">🐛 Pest Info</button>
+      <button class="nav-item" data-tab="cultivation">🌱 Tips</button>
+      <button class="nav-item" data-tab="alert">🚨 Alerts</button>
+      <button class="nav-item" data-tab="profit">💰 Profit</button>
+      <button class="nav-item" data-tab="assistant">🎙 Voice Assistant</button>
+      <button class="nav-item" data-tab="chatbot">💬 Chatbot</button>
+      <button class="nav-item" data-tab="forum">🌐 Forum</button>
+    </nav>
+    <footer>© 2025 Kishan HAL</footer>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="content">
+    <header class="topbar">
+      <div class="welcome">Welcome, Farmer 👨‍🌾</div>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="hi">हिन्दी</option>
+        <option value="pa">ਪੰਜਾਬੀ</option>
+        <option value="mr">मराठी</option>
+      </select>
+    </header>
+
+    <!-- Dashboard -->
+    <section id="dashboard" class="panel visible">
+      <h1>📊 Smart Farmer Dashboard</h1>
+      <div class="grid dash-grid">
+        <div class="card"><h3>🌦 Weather</h3><div id="dashWeather">--</div></div>
+        <div class="card"><h3>🌾 Soil</h3><div id="dashSoil">--</div></div>
+        <div class="card"><h3>🧠 AI Recommendation</h3><div id="dashAI">--</div></div>
+        <div class="card"><h3>🐛 Pest Alert</h3><div id="dashPest">--</div></div>
+        <div class="card"><h3>💰 Profit</h3><div id="dashProfit">--</div></div>
+      </div>
+    </section>
+
+    <!-- Soil Test -->
+    <section id="soil" class="panel">
+      <h1>🌾 Soil Test & Fertilizer Recommendation</h1>
+      <form id="soilForm" class="form">
+        <label>Crop</label><select id="crop" required></select>
+        <label>pH</label><input id="ph" type="number" step="0.1" min="3.5" max="10" placeholder="6.5" required>
+        <label>N (mg/kg)</label><input id="n" type="number" min="0" max="5000" placeholder="300" required>
+        <label>P (mg/kg)</label><input id="p" type="number" min="0" max="5000" placeholder="30" required>
+        <label>K (mg/kg)</label><input id="k" type="number" min="0" max="5000" placeholder="250" required>
+        <label>Moisture (%)</label><input id="moisture" type="number" min="0" max="100" placeholder="25" required>
+        <button class="primary" type="submit">Analyze Soil</button>
+      </form>
+      <div id="soilResult" class="result"></div>
+    </section>
+
+    <!-- Irrigation -->
+    <section id="irrigation" class="panel">
+      <h1>💧 Irrigation Advice</h1>
+      <form id="irrigationForm" class="form">
+        <label>Crop</label><select id="irrigCrop" required></select>
+        <label>Soil Type</label>
+        <select id="soilType" required>
+          <option value="sandy">Sandy</option>
+          <option value="loam">Loam</option>
+          <option value="clay">Clay</option>
+        </select>
+        <label>Stage</label>
+        <select id="stage" required>
+          <option value="initial">Initial</option>
+          <option value="vegetative">Vegetative</option>
+          <option value="flowering">Flowering</option>
+          <option value="maturity">Maturity</option>
+        </select>
+        <button class="primary" type="submit">Get Schedule</button>
+      </form>
+      <div id="irrigationResult" class="result"></div>
+    </section>
+
+    <!-- Disease Check -->
+    <section id="disease" class="panel">
+      <h1>🦠 Leaf Disease Check (AI-lite)</h1>
+      <div class="card">
+        <video id="camera" autoplay playsinline class="hidden"></video>
+        <canvas id="snapshot" class="hidden"></canvas>
+        <input type="file" id="leafInput" accept="image/*" />
+        <div class="btn-row">
+          <button id="openCam" class="secondary">📷 Open Camera</button>
+          <button id="capture" class="secondary hidden">Capture</button>
+          <button id="closeCam" class="secondary hidden">Close</button>
+        </div>
+        <button id="analyzeLeaf" class="primary">Analyze Leaf</button>
+        <button id="clearDisease" class="secondary">Clear</button>
+      </div>
+      <div id="diseaseResult" class="result"></div>
+      <small>Note: quick heuristic + optional TF model. Replace with leaf-disease model later.</small>
+    </section>
+
+    <!-- Mandi Prices -->
+    <section id="mandi" class="panel">
+      <h1>💹 Mandi Prices (Prototype)</h1>
+      <form id="mandiForm" class="form">
+        <label>Crop</label><select id="mandiCrop" required></select>
+        <button type="submit" class="primary">Check Prices</button>
+      </form>
+      <div id="mandiResult" class="result table-wrap"></div>
+      <small>For live data, connect to data.gov.in API using your API key.</small>
+    </section>
+
+    <!-- Weather -->
+    <section id="weather" class="panel">
+      <h1>🌤 Live Weather</h1>
+      <form id="weatherForm" class="form">
+        <label>City</label>
+        <input id="city" type="text" placeholder="Delhi, Patna, Pune">
+        <div class="btn-row">
+          <button type="submit" class="primary">Check Weather</button>
+          <button type="button" id="autoWeather" class="secondary">Use My Location</button>
+        </div>
+      </form>
+      <div id="weatherResult" class="result"></div>
+      <div class="card"><h3>7-Day Forecast</h3><canvas id="weatherChart" height="220"></canvas></div>
+    </section>
+
+    <!-- AI Recommendations -->
+    <section id="ai" class="panel">
+      <h1>🧠 Smart AI Recommendations</h1>
+      <button id="generateAI" class="primary">Generate Recommendations</button>
+      <div id="aiResult" class="result"></div>
+    </section>
+
+    <!-- Crop Comparison -->
+    <section id="compare" class="panel">
+      <h1>🌿 Crop Comparison</h1>
+      <form id="compareForm" class="form">
+        <label>Crop 1</label><select id="crop1" required></select>
+        <label>Crop 2</label><select id="crop2" required></select>
+        <button type="submit" class="primary">Compare</button>
+      </form>
+      <div id="compareResult" class="result"></div>
+      <div class="card">
+        <h3>Comparison Chart</h3>
+        <canvas id="compareChart" height="220"></canvas>
+      </div>
+    </section>
+
+    <!-- Smart Crop Selector -->
+    <section id="smart" class="panel">
+      <h1>🤖 Smart Crop Selector</h1>
+      <form id="smartForm" class="form">
+        <label>City</label>
+        <input id="smartCity" type="text" placeholder="e.g. Patna, Pune, Jaipur">
+        <button type="submit" class="primary">Analyze My Area</button>
+      </form>
+      <div id="smartResult" class="result"></div>
+    </section>
+
+    <!-- Fertilizer Calculator -->
+    <section id="fertcalc" class="panel">
+      <h1>🧮 Fertilizer Calculator</h1>
+      <form id="fertForm" class="form">
+        <label>Crop</label><select id="fertCrop" required></select>
+        <label>Area (acre)</label><input id="area" type="number" min="0.1" step="0.1" required>
+        <button type="submit" class="primary">Calculate</button>
+      </form>
+      <div id="fertResult" class="result"></div>
+    </section>
+
+    <!-- Pest Info -->
+    <section id="pestinfo" class="panel">
+      <h1>🐛 Pests & Disease Info</h1>
+      <select id="diseaseCrop" required></select>
+      <button id="showDisease" class="primary">Show Info</button>
+      <div id="diseaseInfo" class="result"></div>
+    </section>
+
+    <!-- Cultivation Tips -->
+    <section id="cultivation" class="panel">
+      <h1>🌱 Cultivation Tips</h1>
+      <select id="tipCrop" required></select>
+      <button id="showTip" class="primary">Show Tips</button>
+      <div id="tipResult" class="result"></div>
+    </section>
+
+    <!-- Alerts -->
+    <section id="alert" class="panel">
+      <h1>🚨 Pest & Disease Alerts</h1>
+      <button id="checkAlert" class="primary">Check Alert (from current weather)</button>
+      <div id="alertResult" class="result"></div>
+    </section>
+
+    <!-- Profit -->
+    <section id="profit" class="panel">
+      <h1>💰 Estimate Your Field Profit</h1>
+      <form id="profitForm" class="form">
+        <label>Crop</label><select id="profitCrop" required></select>
+        <label>Area (acre)</label><input id="profitArea" type="number" min="0.1" step="0.1" required>
+        <label>Total Cost (₹/acre)</label><input id="cost" type="number" min="0" step="100" value="15000" required>
+        <button type="submit" class="primary">Estimate Profit</button>
+      </form>
+      <div id="profitResult" class="result"></div>
+    </section>
+
+    <!-- Voice Assistant -->
+    <section id="assistant" class="panel">
+      <h1>🎙 Voice Assistant (Beta)</h1>
+      <label>Language</label>
+      <select id="asrLang">
+        <option value="hi-IN">हिन्दी (India)</option>
+        <option value="pa-IN">ਪੰਜਾਬੀ (India)</option>
+        <option value="mr-IN">मराठी (India)</option>
+        <option value="en-IN">English (India)</option>
+      </select>
+      <div class="btn-row">
+        <button id="startVoice" class="primary">🎤 Start Listening</button>
+        <button id="stopVoice" class="secondary">Stop</button>
+      </div>
+      <div id="voiceResult" class="result"></div>
+    </section>
+
+    <!-- Chatbot -->
+    <section id="chatbot" class="panel">
+      <h1>💬 AI Farming Chatbot (Rule-based)</h1>
+      <div id="chatBox" class="chatbox"></div>
+      <div class="chat-input">
+        <input id="chatInput" placeholder="Type or speak your question..." />
+        <button id="sendChat" class="primary">Send</button>
+        <button id="micBtn" class="secondary">🎤</button>
+      </div>
+    </section>
+
+    <!-- Forum -->
+    <section id="forum" class="panel">
+      <h1>🌐 Community Forum</h1>
+      <form id="postForm" class="form">
+        <input id="postName" placeholder="Your Name (optional)" />
+        <textarea id="postText" placeholder="Ask or share something..." required></textarea>
+        <button class="primary" type="submit">Post</button>
+      </form>
+      <div id="postsList" class="result"></div>
+    </section>
+  </main>
+
+  <!-- MAIN APP LOGIC -->
+  <script src="app3.js"></script>
+</body>
+</html>

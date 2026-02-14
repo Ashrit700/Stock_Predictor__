@@ -1,0 +1,142 @@
+<!-- Updated full working prototype HTML + JS in one file with API placeholders -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kishan HAL – Smart Farming Suite</title>
+  <style>
+    body {font-family: Arial; margin:0; display:flex;}
+    .sidebar {width:220px; background:#2d522d; color:white; height:100vh; padding:10px 0; overflow-y:auto;}
+    .sidebar .nav-item {display:block; width:100%; padding:10px; background:none; border:0; text-align:left; color:white; cursor:pointer;}
+    .sidebar .active {background:#1a331a;}
+    main {flex:1; padding:20px; overflow-y:auto; height:100vh;}
+    .panel {display:none;} .visible {display:block;}
+    .form {display:grid; gap:10px; max-width:400px;}
+    .primary {background:#2d522d; color:white; padding:8px; border:0; cursor:pointer;}
+    .secondary {background:#ddd; padding:8px; border:0; cursor:pointer;}
+    .result {margin-top:20px; padding:10px; background:#f2f2f2;}
+    .grid {display:grid; gap:10px; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));}
+    .card {background:white; padding:15px; border-radius:6px; box-shadow:0 0 5px rgba(0,0,0,0.1);} 
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <button class="nav-item active" data-tab="dashboard">Dashboard</button>
+  <button class="nav-item" data-tab="weather">Weather</button>
+  <button class="nav-item" data-tab="ai">AI Reco</button>
+  <button class="nav-item" data-tab="compare">Compare Crops</button>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <!-- Dashboard -->
+  <section id="dashboard" class="panel visible">
+    <h1>Dashboard</h1>
+    <div class="grid">
+      <div class="card"><h3>Weather</h3><div id="dashWeather">--</div></div>
+      <div class="card"><h3>AI Recommendation</h3><div id="dashAI">--</div></div>
+    </div>
+  </section>
+
+  <!-- Weather -->
+  <section id="weather" class="panel">
+    <h1>Live Weather</h1>
+    <form id="weatherForm" class="form">
+      <label>City</label><input id="city" placeholder="Delhi">
+      <button class="primary">Check</button>
+    </form>
+    <div id="weatherResult" class="result"></div>
+  </section>
+
+  <!-- AI -->
+  <section id="ai" class="panel">
+    <h1>AI Smart Recommendation</h1>
+    <button id="generateAI" class="primary">Generate</button>
+    <div id="aiResult" class="result"></div>
+  </section>
+
+  <!-- Compare -->
+  <section id="compare" class="panel">
+    <h1>Compare Two Crops</h1>
+    <form id="compareForm" class="form">
+      <select id="crop1"><option>Wheat</option><option>Rice</option><option>Maize</option></select>
+      <select id="crop2"><option>Wheat</option><option>Rice</option><option>Maize</option></select>
+      <button class="primary">Compare</button>
+    </form>
+    <div id="compareResult" class="result"></div>
+  </section>
+
+</main>
+
+<script>
+// PANEL SWITCHING
+const navItems=document.querySelectorAll('.nav-item');
+const panels=document.querySelectorAll('.panel');
+navItems.forEach(btn=>{
+  btn.onclick=()=>{
+    navItems.forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    panels.forEach(p=>p.classList.remove('visible'));
+    document.getElementById(btn.dataset.tab).classList.add('visible');
+  };
+});
+
+// WEATHER API (Open-Meteo free)
+async function getWeather(city){
+  try {
+    const geo=await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${city}`).then(r=>r.json());
+    if(!geo.results) return {error:"City not found"};
+    const {latitude,longitude}=geo.results[0];
+    const w=await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`).then(r=>r.json());
+    return w.current_weather;
+  } catch(e){return {error:"API error"}}
+}
+
+document.getElementById('weatherForm').onsubmit=async(e)=>{
+  e.preventDefault();
+  let city=document.getElementById('city').value;
+  let data=await getWeather(city);
+  document.getElementById('weatherResult').innerHTML=data.error?data.error:`Temp: ${data.temperature}°C <br> Wind: ${data.windspeed} km/h`;
+  document.getElementById('dashWeather').innerText=data.temperature+"°C";
+};
+
+// AI RECOMMENDATION (Prototype Logic)
+function generateAIReco(){
+  const suggestions=["Best crop now: Wheat due to temperature.","Irrigation needed within 2 days.","High profit crop: Maize."];
+  return suggestions[Math.floor(Math.random()*suggestions.length)];
+}
+
+document.getElementById('generateAI').onclick=()=>{
+  let reco=generateAIReco();
+  document.getElementById('aiResult').innerText=reco;
+  document.getElementById('dashAI').innerText=reco;
+};
+
+// CROP COMPARISON PROTOTYPE
+const cropData={
+  "Wheat": {water:"Low",profit:"Medium",duration:"120 days"},
+  "Rice":  {water:"High",profit:"High", duration:"140 days"},
+  "Maize": {water:"Medium",profit:"Medium",duration:"110 days"}
+};
+
+document.getElementById('compareForm').onsubmit=(e)=>{
+  e.preventDefault();
+  let c1=document.getElementById('crop1').value;
+  let c2=document.getElementById('crop2').value;
+  let a=cropData[c1], b=cropData[c2];
+  document.getElementById('compareResult').innerHTML=
+    `<h3>${c1} vs ${c2}</h3>
+     <b>Water:</b> ${a.water} vs ${b.water}<br>
+     <b>Profit:</b> ${a.profit} vs ${b.profit}<br>
+     <b>Duration:</b> ${a.duration} vs ${b.duration}`;
+};
+
+</script>
+
+</body>
+</html>
+
